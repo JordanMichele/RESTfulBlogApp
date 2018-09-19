@@ -4,12 +4,13 @@ const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const expressSanitizer = require("express-sanitizer");
 const mongoose = require("mongoose");
+const { PORT, DATABASE_URL } = require("./config");
 
-//App Config
-//mongoose.connect("mongodb://localhost/restful_blog_app");
-mongoose.connect(
-  "mongodb://jordan:jordan123@ds131151.mlab.com:31151/restful_blog_app"
-);
+// //App Config
+// //mongoose.connect("mongodb://localhost/restful_blog_app");
+// mongoose.connect(
+//   "mongodb://jordan:jordan123@ds131151.mlab.com:31151/restful_blog_app"
+// );
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -106,6 +107,51 @@ app.delete("/blogs/:id", function(req, res) {
   //Redirect Somewhere
 });
 
-app.listen(3000, function() {
-  console.log("Restful Blog Server has started");
-});
+// app.listen(3000, function() {
+//   console.log("Restful Blog Server has started");
+// });
+
+// this function connects to our database, then starts the server
+function runServer(databaseUrl, port = PORT) {
+  return new Promise((resolve, reject) => {
+    mongoose.connect(
+      databaseUrl,
+      err => {
+        if (err) {
+          return reject(err);
+        }
+        server = app
+          .listen(port, () => {
+            console.log(`Your app is listening on port ${port}`);
+            resolve();
+          })
+          .on("error", err => {
+            mongoose.disconnect();
+            reject(err);
+          });
+      }
+    );
+  });
+}
+
+// this function closes the server, and returns a promise. we'll
+// use it in our integration tests later.
+function closeServer() {
+  return mongoose.disconnect().then(() => {
+    return new Promise((resolve, reject) => {
+      console.log("Closing server");
+      server.close(err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  });
+}
+
+// if app.js is called directly (aka, with `node app.js`), this block
+// runs. but we also export the runServer command so other code (for instance, test code) can start the server as needed.
+if (require.main === module) {
+  runServer(DATABASE_URL).catch(err => console.error(err));
+}
