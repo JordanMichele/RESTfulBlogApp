@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const expressSanitizer = require("express-sanitizer");
 const mongoose = require("mongoose");
-const { PORT, DATABASE_URL } = require("./config");
 
 //App Config
 //mongoose.connect("mongodb://localhost/restful_blog_app");
