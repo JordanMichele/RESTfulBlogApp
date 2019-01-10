@@ -40,6 +40,10 @@ app.get("/blogs", function(req, res) {
     }
   });
 });
+//OSU HUMOR 
+app.get("/blogs/osuHumor", function(req, res) {
+  res.render("osuHumor");
+})
 //NEW Route
 app.get("/blogs/new", function(req, res) {
   res.render("new");
